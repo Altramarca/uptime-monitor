@@ -57,7 +57,7 @@ const workerConfig = {
       // [OPTIONAL] if specified, will call the check proxy to check the monitor, mainly for geo-specific checks
       // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Check-proxy-setup before setting this value
       // currently supports `worker://` and `http(s)://` proxies
-      // checkProxy: 'https://xxx.example.com OR worker://weur',
+      checkProxy: 'worker://weur'
       // [OPTIONAL] if true, the check will fallback to local if the specified proxy is down
       // checkProxyFallback: true,
     },
@@ -91,7 +91,7 @@ const workerConfig = {
       // [OPTIONAL] `hideLatencyChart` will hide status page latency chart if set to true
       hideLatencyChart: false,
       // [OPTIONAL] `expectedCodes` is an array of acceptable HTTP response codes, if not specified, default to 2xx
-      expectedCodes: [200],
+      expectedCodes: [200, 403],
       // [OPTIONAL] `timeout` in millisecond, if not specified, default to 10000
       timeout: 10000,
       // [OPTIONAL] headers to be sent
@@ -107,7 +107,7 @@ const workerConfig = {
       // [OPTIONAL] if specified, will call the check proxy to check the monitor, mainly for geo-specific checks
       // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Check-proxy-setup before setting this value
       // currently supports `worker://` and `http(s)://` proxies
-      // checkProxy: 'https://xxx.example.com OR worker://weur',
+      checkProxy: 'worker://weur'
       // [OPTIONAL] if true, the check will fallback to local if the specified proxy is down
       // checkProxyFallback: true,
     },
@@ -127,7 +127,7 @@ const workerConfig = {
       // [OPTIONAL] `hideLatencyChart` will hide status page latency chart if set to true
       hideLatencyChart: false,
       // [OPTIONAL] `expectedCodes` is an array of acceptable HTTP response codes, if not specified, default to 2xx
-      expectedCodes: [200],
+      expectedCodes: [200, 403],
       // [OPTIONAL] `timeout` in millisecond, if not specified, default to 10000
       timeout: 10000,
       // [OPTIONAL] headers to be sent
@@ -143,7 +143,7 @@ const workerConfig = {
       // [OPTIONAL] if specified, will call the check proxy to check the monitor, mainly for geo-specific checks
       // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Check-proxy-setup before setting this value
       // currently supports `worker://` and `http(s)://` proxies
-      // checkProxy: 'https://xxx.example.com OR worker://weur',
+      checkProxy: 'worker://weur'
       // [OPTIONAL] if true, the check will fallback to local if the specified proxy is down
       // checkProxyFallback: true,
     },
