@@ -113,6 +113,42 @@ const workerConfig = {
     },
     {
       // `id` should be unique, history will be kept if the `id` remains constant
+      id: 'donbosco-pn',
+      // `name` is used at status page and callback message
+      name: 'ACTION SCHOOL (new frontend)',
+      // `method` should be a valid HTTP Method
+      method: 'GET',
+      // `target` is a valid URL
+      target: 'https://donbosco-pn.actionschool.it/',
+      // [OPTIONAL] `tooltip` is ONLY used at status page to show a tooltip
+      tooltip: 'We make clothing for your school',
+      // [OPTIONAL] `statusPageLink` is ONLY used for clickable link at status page
+      statusPageLink: 'https://actionschool.it/',
+      // [OPTIONAL] `hideLatencyChart` will hide status page latency chart if set to true
+      hideLatencyChart: false,
+      // [OPTIONAL] `expectedCodes` is an array of acceptable HTTP response codes, if not specified, default to 2xx
+      expectedCodes: [200, 403],
+      // [OPTIONAL] `timeout` in millisecond, if not specified, default to 10000
+      timeout: 10000,
+      // [OPTIONAL] headers to be sent
+      headers: {
+        'User-Agent': 'Uptimeflare',
+      },
+      // [OPTIONAL] body to be sent
+      // body: 'Hello, world!',
+      // [OPTIONAL] if specified, the response must contains the keyword to be considered as operational.
+      // responseKeyword: 'success',
+      // [OPTIONAL] if specified, the response must NOT contains the keyword to be considered as operational.
+      // responseForbiddenKeyword: 'bad gateway',
+      // [OPTIONAL] if specified, will call the check proxy to check the monitor, mainly for geo-specific checks
+      // refer to docs https://github.com/lyc8503/UptimeFlare/wiki/Check-proxy-setup before setting this value
+      // currently supports `worker://` and `http(s)://` proxies
+      checkProxy: 'worker://weur'
+      // [OPTIONAL] if true, the check will fallback to local if the specified proxy is down
+      // checkProxyFallback: true,
+    },
+    {
+      // `id` should be unique, history will be kept if the `id` remains constant
       id: 'piox',
       // `name` is used at status page and callback message
       name: 'ACTION SCHOOL',
