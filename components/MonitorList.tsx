@@ -1,7 +1,8 @@
-import { MonitorState, MonitorTarget } from '@/uptime.types'
+import { MonitorState, MonitorTarget } from '@/types/config'
 import { Accordion, Card, Center, Text } from '@mantine/core'
 import MonitorDetail from './MonitorDetail'
 import { pageConfig } from '@/uptime.config'
+import { useEffect, useState } from 'react'
 
 function countDownCount(state: MonitorState, ids: string[]) {
   let downCount = 0
@@ -35,15 +36,28 @@ export default function MonitorList({
   monitors: MonitorTarget[]
   state: MonitorState
 }) {
-  // @ts-ignore
-  let group: any = pageConfig.group
-  let groupedMonitor = group && Object.keys(group).length > 0
+  const group = pageConfig.group
+  const groupedMonitor = group && Object.keys(group).length > 0
   let content
+
+  // Load expanded groups from localStorage
+  const savedExpandedGroups = localStorage.getItem('expandedGroups')
+  const expandedInitial = savedExpandedGroups ? JSON.parse(savedExpandedGroups) : Object.keys(group || {})
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(expandedInitial)
+  useEffect(() => {
+    localStorage.setItem('expandedGroups', JSON.stringify(expandedGroups))
+  }, [expandedGroups])
 
   if (groupedMonitor) {
     // Grouped monitors
     content = (
-      <Accordion multiple defaultValue={Object.keys(group)} variant="contained">
+      <Accordion
+        multiple
+        defaultValue={Object.keys(group)}
+        variant="contained"
+        value={expandedGroups}
+        onChange={(values) => setExpandedGroups(values)}
+      >
         {Object.keys(group).map((groupName) => (
           <Accordion.Item key={groupName} value={groupName}>
             <Accordion.Control>
@@ -102,8 +116,8 @@ export default function MonitorList({
         shadow="sm"
         padding="lg"
         radius="md"
-        ml="xl"
-        mr="xl"
+        ml="md"
+        mr="md"
         mt="xl"
         withBorder={!groupedMonitor}
         style={{ width: groupedMonitor ? '897px' : '865px' }}

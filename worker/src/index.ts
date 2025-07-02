@@ -1,6 +1,6 @@
-import { workerConfig } from '../../uptime.config'
+import { workerConfig, maintenances } from '../../uptime.config'
 import { formatStatusChangeNotification, getWorkerLocation, notifyWithApprise } from './util'
-import { MonitorState, MonitorTarget } from '../../uptime.types'
+import { MonitorState, MonitorTarget } from '../../types/config'
 import { getStatus } from './monitor'
 import { DurableObject } from 'cloudflare:workers'
 
@@ -9,7 +9,7 @@ export interface Env {
   REMOTE_CHECKER_DO: DurableObjectNamespace<RemoteChecker>
 }
 
-export default {
+const Worker = {
   async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
     const workerLocation = (await getWorkerLocation()) || 'ERROR'
     console.log(`Running scheduled event on ${workerLocation}...`)
@@ -23,12 +23,26 @@ export default {
       reason: string
     ) => {
       // Skip notification if monitor is in the skip list
-      // @ts-ignore
-      const skipList: string[] = workerConfig.notification?.skipNotificationIds
+      const skipList = workerConfig.notification?.skipNotificationIds
       if (skipList && skipList.includes(monitor.id)) {
         console.log(
           `Skipping notification for ${monitor.name} (${monitor.id} in skipNotificationIds)`
         )
+        return
+      }
+
+      // Skip notification if monitor is in maintenance
+      const maintenanceList = maintenances
+        .filter(
+          (m) =>
+            new Date(timeNow * 1000) >= new Date(m.start) &&
+            (!m.end || new Date(timeNow * 1000) <= new Date(m.end))
+        )
+        .map((e) => (e.monitors || []))
+        .flat()
+
+      if (maintenanceList.includes(monitor.id)) {
+        console.log(`Skipping notification for ${monitor.name} (in maintenance)`)
         return
       }
 
@@ -94,6 +108,12 @@ export default {
               locationHint: doLoc as DurableObjectLocationHint,
             })
             resp = await doStub.getLocationAndStatus(monitor)
+            try {
+              // Kill the DO instance after use, to avoid extra resource usage
+              await doStub.kill()
+            } catch (err) {
+              // An error here is expected, ignore it
+            }
           } else {
             resp = await (
               await fetch(monitor.checkProxy, {
@@ -159,7 +179,7 @@ export default {
             }
 
             console.log('Calling config onStatusChange callback...')
-            await workerConfig.callbacks.onStatusChange(
+            await workerConfig.callbacks?.onStatusChange(
               env,
               monitor,
               true,
@@ -230,7 +250,7 @@ export default {
 
           if (monitorStatusChanged) {
             console.log('Calling config onStatusChange callback...')
-            await workerConfig.callbacks.onStatusChange(
+            await workerConfig.callbacks?.onStatusChange(
               env,
               monitor,
               false,
@@ -246,7 +266,7 @@ export default {
 
         try {
           console.log('Calling config onIncident callback...')
-          await workerConfig.callbacks.onIncident(
+          await workerConfig.callbacks?.onIncident(
             env,
             monitor,
             currentIncident.start[0],
@@ -323,6 +343,8 @@ export default {
   },
 }
 
+export default Worker
+
 export class RemoteChecker extends DurableObject {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env)
@@ -338,5 +360,13 @@ export class RemoteChecker extends DurableObject {
       location: colo,
       status: status,
     }
+  }
+
+  async kill() {
+    // Throwing an error in `blockConcurrencyWhile` will terminate the Durable Object instance
+    // https://developers.cloudflare.com/durable-objects/api/state/#blockconcurrencywhile
+    this.ctx.blockConcurrencyWhile(async () => {
+      throw 'killed'
+    })
   }
 }
